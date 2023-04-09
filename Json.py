@@ -1,7 +1,7 @@
 import json
 
 # Open JSON File : 
-file = open('space_race_q.json')
+file = open('./src/space_race_q.json')
 
 # Return JSON Object as a dictionary]
 
@@ -31,11 +31,11 @@ context = data['paragraphs'][0]["context"]
 # print(questions_answers_list[0]["answers"][0]["text"])
 # print(questions_answers_list[0]["answers"][0]["answer_start"])
 for i in range(len(questions_answers_list)):
-    print(questions_answers_list[i])
+    # print(questions_answers_list[i])
     print(questions_answers_list[i]["question"])
-    print(questions_answers_list[i]["id"])
-    print(questions_answers_list[i]["answers"])
-    print(questions_answers_list[i]["answers"][0]["text"])
-    print(questions_answers_list[i]["answers"][0]["answer_start"])
+    # print(questions_answers_list[i]["id"])
+    # print(questions_answers_list[i]["answers"])
+    # print(questions_answers_list[i]["answers"][0]["text"])
+    # print(questions_answers_list[i]["answers"][0]["answer_start"])
 
 file.close()

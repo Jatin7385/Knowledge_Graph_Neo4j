@@ -7,7 +7,8 @@ from GoogleNews import GoogleNews
 import IPython
 from pyvis.network import Network
 import json
-from neo4j_test import GraphDatabase
+from neo4j import GraphDatabase
+from Neo4j_KG_Maker import KG
 
 
 # Database Credentials
@@ -23,51 +24,6 @@ final_relations = []
 
 # Connect to the neo4j database server
 graphDB_Driver  = GraphDatabase.driver(uri, auth=(userName, password))
-
-# CQL to query all the universities present in the graph
-cqlNodeQuery = "MATCH (x:university) RETURN x"
-
-# CQL to create a graph containing some of the Ivy League universities
-
-cqlCreate = """CREATE (cornell:university { name: "Cornell University"}),
-
-(yale:university { name: "Yale University"}),
-
-(princeton:university { name: "Princeton University"}),
-
-(harvard:university { name: "Harvard University"}),
-
- 
-
-(cornell)-[:connects_in {miles: 259}]->(yale),
-
-(cornell)-[:connects_in {miles: 210}]->(princeton),
-
-(cornell)-[:connects_in {miles: 327}]->(harvard),
-
- 
-
-(yale)-[:connects_in {miles: 259}]->(cornell),
-
-(yale)-[:connects_in {miles: 133}]->(princeton),
-
-(yale)-[:connects_in {miles: 133}]->(harvard),
-
- 
-
-(harvard)-[:connects_in {miles: 327}]->(cornell),
-
-(harvard)-[:connects_in {miles: 133}]->(yale),
-
-(harvard)-[:connects_in {miles: 260}]->(princeton),
-
- 
-
-(princeton)-[:connects_in {miles: 210}]->(cornell),
-
-(princeton)-[:connects_in {miles: 133}]->(yale),
-
-(princeton)-[:connects_in {miles: 260}]->(harvard)"""
 
 
 # Load model and tokenizer
@@ -121,24 +77,6 @@ def extract_relations_from_model_output(text):
         })
     return relations
 
-
-
-# class KB():
-#     def __init__(self):
-#         self.relations = []
-
-#     def are_relations_equal(self, r1, r2):
-#         return all(r1[attr] == r2[attr] for attr in ["head", "type", "tail"])
-
-#     def add_relation(self, r):
-#         if not self.exists_relation(r):
-#             self.relations.append(r)
-
-#     def print(self):
-#         print("Relations:")
-#         for r in self.relations:
-#             print(f"  {r}")
-
 def are_relations_equal(r1, r2):
         return all(r1[attr] == r2[attr] for attr in ["head", "type", "tail"])
 def exists_relation(r1):
@@ -153,7 +91,13 @@ def print_relations():
         entities.append(r["tail"])
         print(f"  {r}")
     return entities
-
+def print_relations_q():
+    entities1 = []
+    final_relations = []
+    for r in final_relations:
+        entities1.append(r["head"])
+        entities1.append(r["tail"])
+    return entities1
 def from_small_text_to_kb(text, verbose=False):
     # kb = KB()
 
@@ -249,3 +193,32 @@ print(cqlCommands)
 file1 = open("commands.txt","w")
 file1.writelines(cqlCommands)
 file1.close()
+
+# # Now lets make the Knowledge Graph : 
+# kg = KG("bolt://44.203.229.74:7687", "neo4j", "thermometer-sponges-basins")
+# kg.create_graph()
+# kg.close()
+
+## Extracting the questions present in the dataset : 
+questions = []
+for i in range(len(questions_answers_list)):
+    question = questions_answers_list[i]["question"]
+    questions.append(question)
+
+# Named entity recognition and relationship extraction of the questions present : 
+entities = []
+final_final_relations = []
+for i in range(len(questions)):
+    final_relations = []
+    entity = []
+    kb = from_small_text_to_kb(questions[i], verbose=True)
+    # entities = list(set(entities))
+    entity = print_relations_q()
+    print("Entity : ", entity)
+    entity = list(set(entity))
+    entities.append(entity)
+    final_final_relations.append(final_relations)
+
+print(entities)
+print(final_final_relations)
+
