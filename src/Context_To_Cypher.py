@@ -9,6 +9,7 @@ from pyvis.network import Network
 import json
 from neo4j import GraphDatabase
 from Neo4j_KG_Maker import KG
+import csv
 
 
 # Database Credentials
@@ -91,13 +92,6 @@ def print_relations():
         entities.append(r["tail"])
         print(f"  {r}")
     return entities
-def print_relations_q():
-    entities1 = []
-    final_relations = []
-    for r in final_relations:
-        entities1.append(r["head"])
-        entities1.append(r["tail"])
-    return entities1
 def from_small_text_to_kb(text, verbose=False):
     # kb = KB()
 
@@ -151,48 +145,48 @@ questions_answers_list = data['paragraphs'][0]["qas"]
 # print(data['paragraphs'][0]["qas"])
 context = data['paragraphs'][0]["context"]
 
-print("Context : ", context)
-print("Relations : ")
-kb = from_small_text_to_kb(context, verbose=True)
+# print("Context : ", context)
+# print("Relations : ")
+# kb = from_small_text_to_kb(context, verbose=True)
 
+# # entities = list(set(entities))
+# entities = print_relations()
 # entities = list(set(entities))
-entities = print_relations()
-entities = list(set(entities))
-print(entities)
+# print(entities)
+# # for i in range(len(final_relations)):
+# #     print(final_relations[i])
+
+# # CQL to create a entities in the KG
+# cqlCommands = []
+# for i in range(len(entities)):
+#     name_entity = entities[i].replace(' ', '_')
+#     name_entity = name_entity.replace(',', '')
+#     type_entity = "Entity" # We need to change this according to the NER from Spacy
+#     cqlCreate = f"CREATE ({name_entity} : {type_entity}) SET {name_entity}.name = $name,{name_entity}  \n"
+#     cqlCommands.append(cqlCreate)
+#     print(cqlCreate)
+
+# cqlCommands.append("*** \n")
+
 # for i in range(len(final_relations)):
-#     print(final_relations[i])
+#     rel = final_relations[i]
+#     head = rel["head"].replace(' ', '_')
+#     head = head.replace(',', '')
+#     type_ = rel["type"].replace(' ', '_')
+#     type_ = type_.replace(',', '')
+#     tail = rel["tail"].replace(' ','_')
+#     tail = tail.replace(',','')
+#     cqlRelation = f"MATCH ({head} : Entity) , ({tail} : Entity) WHERE {head}.name = '{head}' AND {tail}.name = '{tail}' CREATE ({head}) -[:{type_}]->({tail}) \n"
+#     cqlCommands.append(cqlRelation)
+#     # print(rel)
+#     print(cqlRelation)
 
-# CQL to create a entities in the KG
-cqlCommands = []
-for i in range(len(entities)):
-    name_entity = entities[i].replace(' ', '_')
-    name_entity = name_entity.replace(',', '')
-    type_entity = "Entity" # We need to change this according to the NER from Spacy
-    cqlCreate = f"CREATE ({name_entity} : {type_entity}) SET {name_entity}.name = $name,{name_entity}  \n"
-    cqlCommands.append(cqlCreate)
-    print(cqlCreate)
+# print(cqlCommands)
 
-cqlCommands.append("*** \n")
-
-for i in range(len(final_relations)):
-    rel = final_relations[i]
-    head = rel["head"].replace(' ', '_')
-    head = head.replace(',', '')
-    type_ = rel["type"].replace(' ', '_')
-    type_ = type_.replace(',', '')
-    tail = rel["tail"].replace(' ','_')
-    tail = tail.replace(',','')
-    cqlRelation = f"MATCH ({head} : Entity) , ({tail} : Entity) WHERE {head}.name = '{head}' AND {tail}.name = '{tail}' CREATE ({head}) -[:{type_}]->({tail}) \n"
-    cqlCommands.append(cqlRelation)
-    # print(rel)
-    print(cqlRelation)
-
-print(cqlCommands)
-
-# Writing the commands to a text file : 
-file1 = open("commands.txt","w")
-file1.writelines(cqlCommands)
-file1.close()
+# # Writing the commands to a text file : 
+# file1 = open("commands.txt","w")
+# file1.writelines(cqlCommands)
+# file1.close()
 
 # # Now lets make the Knowledge Graph : 
 # kg = KG("bolt://44.203.229.74:7687", "neo4j", "thermometer-sponges-basins")
@@ -205,20 +199,44 @@ for i in range(len(questions_answers_list)):
     question = questions_answers_list[i]["question"]
     questions.append(question)
 
-# Named entity recognition and relationship extraction of the questions present : 
-entities = []
-final_final_relations = []
-for i in range(len(questions)):
-    final_relations = []
-    entity = []
-    kb = from_small_text_to_kb(questions[i], verbose=True)
-    # entities = list(set(entities))
-    entity = print_relations_q()
-    print("Entity : ", entity)
-    entity = list(set(entity))
-    entities.append(entity)
-    final_final_relations.append(final_relations)
+print("Context : ", context)
+print("Relations : ")
+kb = from_small_text_to_kb(context, verbose=True)
 
-print(entities)
-print(final_final_relations)
+entities1 = []
+final_final_relations = []
+# Writing the question relations/entities to a text file : 
+with open("question_relations.csv", mode = "w") as file:
+    # Write the relations to the file : 
+    csvwriter = csv.writer(file)
+    # Named entity recognition and relationship extraction of the questions present : 
+    for i in range(len(questions)):
+        final_relations = []
+        entity = []
+        file_list = []
+        kb = from_small_text_to_kb(questions[i], verbose=True)
+        # entities = list(set(entities))
+        entities = print_relations()
+        print("Entity : ", entity)
+        entities = list(set(entity))
+        entities1.append(entities)
+        for j in range(len(final_relations)):
+            file_list = []
+            head = final_relations[j]['head']
+            head = head.replace(",","")
+            head = head.replace(" ","_")
+            type_ = final_relations[j]['type']
+            type_ = type_.replace(",","")
+            type_ = type_.replace(" ","_")
+            tail = final_relations[j]['tail']
+            tail = tail.replace(",","")
+            tail = tail.replace(" ","_")
+            file_list.append(head)
+            file_list.append(type_)
+            file_list.append(tail)
+            csvwriter.writerow(file_list)
+        final_final_relations.append(final_relations)
+
+    print(entities)
+    print(final_final_relations)
 
