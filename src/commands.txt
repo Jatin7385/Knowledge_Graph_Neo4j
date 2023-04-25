@@ -1,7 +1,7 @@
-CREATE (Soviet_Union : Entity) SET Soviet_Union.name = $name,Soviet_Union  
-CREATE (Space_Race : Entity) SET Space_Race.name = $name,Space_Race  
 CREATE (United_States : Entity) SET United_States.name = $name,United_States  
+CREATE (Soviet_Union : Entity) SET Soviet_Union.name = $name,Soviet_Union  
 CREATE (August_2_1955 : Entity) SET August_2_1955.name = $name,August_2_1955  
+CREATE (Space_Race : Entity) SET Space_Race.name = $name,Space_Race  
 *** 
 MATCH (Space_Race : Entity) , (August_2_1955 : Entity) WHERE Space_Race.name = 'Space_Race' AND August_2_1955.name = 'August_2_1955' CREATE (Space_Race) -[:start_time]->(August_2_1955) 
 MATCH (Space_Race : Entity) , (Soviet_Union : Entity) WHERE Space_Race.name = 'Space_Race' AND Soviet_Union.name = 'Soviet_Union' CREATE (Space_Race) -[:participant]->(Soviet_Union) 
