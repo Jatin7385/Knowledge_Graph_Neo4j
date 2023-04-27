@@ -5,7 +5,7 @@ Creating Knowledge Graphs from Contexts/ Texts
 - The working code is in the src folder
 - Before using, change the url and credentials of the neo4j sandbox
 
-## The logic of the project : 
+## The logic of the project : (Use Lemmatization before extracting entities and relationships... That way, the relationships stay constant....) Go over NLP Stages/ Concepts..... Revisit Relationship extraction and the entire KG Maker file in the code...
 This project tries to utilize Knowledge Graphs for question answering systems.
 We use a Neo4j Knowledge Graph for the same...
 
